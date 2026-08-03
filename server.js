@@ -3,19 +3,20 @@ const axios = require('axios');
 
 // ⚙️ CONFIGURATION
 const GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzR7X42lOgTTDi3z9BV_k75hPukWxXomTUKssydEQc7fQMAFI3wsbSYsrUSyWPgcH3A8g/exec";
-const PAIRS = ['paxgusdt', 'btcusdt', 'ethusdt']; // 24x7 Live Crypto/Gold Pairs
+const PAIRS = ['paxgusdt', 'btcusdt', 'ethusdt']; // 24x7 Live Crypto Pairs
 
 let activeTrades = {}; // Background Trade Tracker
 
 console.log("🚀 Saitech 24/7 Engine Initialized...");
 
-// Connect Binance WebSocket Streams
+// Connect Live WebSocket Streams
 PAIRS.forEach(pair => {
     connectStream(pair);
 });
 
 function connectStream(pair) {
-    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${pair}@kline_1m`);
+    // US-friendly Binance Stream Endpoint (Bypasses 451 Region Error)
+    const ws = new WebSocket(`wss://stream.binance.us:9443/ws/${pair}@kline_1m`);
 
     ws.on('open', () => {
         console.log(`🟢 Connected to Live Stream: ${pair.toUpperCase()}`);
@@ -63,9 +64,9 @@ async function processSMCLogic(symbol, currentPrice) {
         return;
     }
 
-    // 2. Simple ATR & SMC Risk Setup Logic
+    // 2. Dynamic SMC Risk Setup Logic
     const atrRisk = currentPrice * 0.0020;
-    const isBullish = true; // Dynamic Algo Shift
+    const isBullish = true; 
 
     const entry = currentPrice.toFixed(2);
     const sl = (isBullish ? currentPrice - atrRisk : currentPrice + atrRisk).toFixed(2);
